@@ -30,6 +30,7 @@ contract VotingRoom {
     }
 
     modifier isEligibleVote() {
+        // TODO: replace below with ZK-magic
         require(hasCastedVote[msg.sender] == false, "Already voted");
         _;
     }
