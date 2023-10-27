@@ -27,6 +27,11 @@ export const menuLinks: HeaderMenuLink[] = [
     href: "/voting-organizer",
     icon: <BugAntIcon className="h-4 w-4" />,
   },
+  {
+    label: "Voter",
+    href: "/voter",
+    icon: <BugAntIcon className="h-4 w-4" />,
+  },
 ];
 
 export const HeaderMenuLinks = () => {
