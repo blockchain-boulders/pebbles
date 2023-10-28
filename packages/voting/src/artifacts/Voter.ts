@@ -79,7 +79,7 @@ export class VoterContract extends ContractBase {
   /** Type-safe wrappers for the public methods exposed by the contract. */
   public methods!: {
     
-    /** vote(vote: field) */
-    vote: ((vote: FieldLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
+    /** vote(vote: field, tallierAddress: struct) */
+    vote: ((vote: FieldLike, tallierAddress: AztecAddressLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
   };
 }
