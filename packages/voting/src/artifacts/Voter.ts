@@ -20,20 +20,20 @@ import {
   PublicKey,
   Wallet,
 } from '@aztec/aztec.js';
-import BlankContractArtifactJson from './Blank.json' assert { type: 'json' };
-export const BlankContractArtifact = BlankContractArtifactJson as ContractArtifact;
+import VoterContractArtifactJson from './Voter.json' assert { type: 'json' };
+export const VoterContractArtifact = VoterContractArtifactJson as ContractArtifact;
 
 /**
- * Type-safe interface for contract Blank;
+ * Type-safe interface for contract Voter;
  */
-export class BlankContract extends ContractBase {
+export class VoterContract extends ContractBase {
   
   private constructor(
     completeAddress: CompleteAddress,
     wallet: Wallet,
     portalContract = EthAddress.ZERO
   ) {
-    super(completeAddress, BlankContractArtifact, wallet, portalContract);
+    super(completeAddress, VoterContractArtifact, wallet, portalContract);
   }
   
 
@@ -48,7 +48,7 @@ export class BlankContract extends ContractBase {
     address: AztecAddress,
     wallet: Wallet,
   ) {
-    return Contract.at(address, BlankContract.artifact, wallet) as Promise<BlankContract>;
+    return Contract.at(address, VoterContract.artifact, wallet) as Promise<VoterContract>;
   }
 
   
@@ -56,14 +56,14 @@ export class BlankContract extends ContractBase {
    * Creates a tx to deploy a new instance of this contract.
    */
   public static deploy(wallet: Wallet, ) {
-    return new DeployMethod<BlankContract>(Point.ZERO, wallet, BlankContractArtifact, Array.from(arguments).slice(1));
+    return new DeployMethod<VoterContract>(Point.ZERO, wallet, VoterContractArtifact, Array.from(arguments).slice(1));
   }
 
   /**
    * Creates a tx to deploy a new instance of this contract using the specified public key to derive the address.
    */
   public static deployWithPublicKey(publicKey: PublicKey, wallet: Wallet, ) {
-    return new DeployMethod<BlankContract>(publicKey, wallet, BlankContractArtifact, Array.from(arguments).slice(2));
+    return new DeployMethod<VoterContract>(publicKey, wallet, VoterContractArtifact, Array.from(arguments).slice(2));
   }
   
 
@@ -72,14 +72,14 @@ export class BlankContract extends ContractBase {
    * Returns this contract's artifact.
    */
   public static get artifact(): ContractArtifact {
-    return BlankContractArtifact;
+    return VoterContractArtifact;
   }
   
 
   /** Type-safe wrappers for the public methods exposed by the contract. */
   public methods!: {
     
-    /** getPublicKey(address: field) */
-    getPublicKey: ((address: FieldLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
+    /** vote(vote: field) */
+    vote: ((vote: FieldLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
   };
 }

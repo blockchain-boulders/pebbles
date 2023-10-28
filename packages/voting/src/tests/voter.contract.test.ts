@@ -1,4 +1,4 @@
-import { BlankContract } from '../artifacts/Blank.js';
+import { VoterContract } from '../artifacts/Voter.js';
 import { callContractFunction, deployContract, getWallet } from '../index.js';
 import {
   AccountWallet,
@@ -26,11 +26,11 @@ const setupSandbox = async () => {
 };
 
 async function deployZKContract(owner: CompleteAddress, wallet: Wallet, pxe: PXE) {
-  logger('Deploying Blank contract...');
-  const contractAddress = await deployContract(owner, BlankContract.artifact, [], Fr.random(), pxe);
+  logger('Deploying Voter contract...');
+  const contractAddress = await deployContract(owner, VoterContract.artifact, [], Fr.random(), pxe);
 
   logger(`L2 contract deployed at ${contractAddress}`);
-  return BlankContract.at(contractAddress, wallet);
+  return VoterContract.at(contractAddress, wallet);
 }
 
 describe('ZK Contract Tests', () => {
@@ -38,7 +38,7 @@ describe('ZK Contract Tests', () => {
   let owner: CompleteAddress;
   let _account2: CompleteAddress;
   let _account3: CompleteAddress;
-  let contract: Contract;
+  let contract: VoterContract;
   let contractAddress: AztecAddress;
   let pxe: PXE;
 
@@ -54,14 +54,8 @@ describe('ZK Contract Tests', () => {
   }, 60000);
 
   test('call succeeds after deploy', async () => {
-    const callTxReceipt = await callContractFunction(
-      contractAddress,
-      contract.artifact,
-      'getPublicKey',
-      [owner.address.toField()],
-      pxe,
-      owner,
-    );
+    const callTxReceipt = await contract.methods.vote(1).send().wait()
+    console.log(callTxReceipt)
     expect(callTxReceipt.status).toBe(TxStatus.MINED);
   }, 40000);
 });
