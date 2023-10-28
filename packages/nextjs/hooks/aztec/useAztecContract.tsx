@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { TallierContractArtifact } from "../../../voting/src/artifacts/Tallier.js";
 import { VoterContractArtifact } from "../../../voting/src/artifacts/Voter.js";
-import { AccountWalletWithPrivateKey, DeployMethod, Fr, PXE } from "@aztec/aztec.js";
+import { AccountWalletWithPrivateKey, Contract, DeployMethod, Fr, PXE } from "@aztec/aztec.js";
 
 const contracts = {
   VOTER: VoterContractArtifact,
@@ -31,15 +31,12 @@ export const useAztecContract = ({
     undefined,
   );
   const [contractAddress, setContractAddress] = useState<string | undefined>(undefined);
-  const [contract, setContract] = useState<any | undefined>(undefined);
 
   if (contractType !== instansiatedContractType) {
     throw new Error("Contract type mismatch");
   }
 
   setInstansiatedContractType(contractType);
-  setContract(contracts[contractType as keyof typeof contracts]);
-  setIsReady(true);
 
   useEffect(() => {
     const deployContract = async () => {
@@ -58,14 +55,24 @@ export const useAztecContract = ({
       } else {
         throw new Error(`Contract not deployed (${receipt.toJSON()})`);
       }
+      setIsReady(true);
     };
     deployContract();
-  }, [contract, contractType, pxe, wallet]);
+  }, [contractType, pxe, wallet]);
+
+  const callContract = async (method: string, typedArgs: any[]) => {
+    if (isReady && contractAddress && contracts[contractType as keyof typeof contracts]) {
+      const contract = await Contract.at(contractAddress, contracts[contractType as keyof typeof contracts], wallet);
+      return contract.methods[method](...typedArgs)
+        .send()
+        .wait();
+    }
+  };
 
   return {
     isReady,
     contractAddress,
-    contract,
     contractType,
+    callContract,
   };
 };
