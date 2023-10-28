@@ -1,16 +1,3 @@
-// contract Voter {
-
-//     #[aztec(private)]
-//     fn constructor() {}
-
-//     #[aztec(private)]
-//     fn vote(
-//         vote: Field,
-//     ) -> Field{
-//         vote
-//     }
-// }
-
 contract Tallier {
 
     use dep::aztec::{

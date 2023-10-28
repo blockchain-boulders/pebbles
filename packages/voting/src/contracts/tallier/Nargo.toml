@@ -1,5 +1,5 @@
 [package]
-name = "blank"
+name = "Tallier"
 authors = [""]
 compiler_version = "0.1"
 type = "contract"

@@ -14,7 +14,9 @@
     "start:sandbox": "SANDBOX_VERSION=0.12.0 /bin/bash -c \"$(curl -fsSL 'https://sandbox.aztec.network')\" ",
     "formatting": "prettier --check ./src && eslint ./src",
     "formatting:fix": "prettier -w ./src",
-    "compile": "aztec-cli compile src/contracts --outdir ../artifacts --typescript ../artifacts",
+    "compile": "mkdir -p src/artifacts && yarn compile:tallier && yarn compile:voter",
+    "compile:tallier": "aztec-cli compile src/contracts/tallier --outdir ../../artifacts --typescript ../../artifacts",
+    "compile:voter": "aztec-cli compile src/contracts/voter --outdir ../../artifacts --typescript ../../artifacts",
     "compile:local": "ts-node --esm ../../cli/src/bin/index.ts compile \"src/contracts\" --outdir \"../artifacts\" --typescript \"../artifacts\"",
     "test:integration": "NODE_NO_WARNINGS=1 node --experimental-vm-modules $(yarn bin jest) --runInBand"
   },
@@ -42,6 +44,7 @@
     "serve": "^14.2.1"
   },
   "devDependencies": {
+    "@aztec/cli": "^0.12.0",
     "@types/jest": "^29.5.0",
     "@types/mocha": "^10.0.3",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
