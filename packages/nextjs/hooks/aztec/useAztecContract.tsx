@@ -13,7 +13,7 @@ export const useAztecContract = ({
   pxe,
   contractType,
 }: {
-  wallet: AccountWalletWithPrivateKey;
+  wallet?: AccountWalletWithPrivateKey;
   pxe: PXE;
   contractType: keyof typeof contracts;
 }) => {
