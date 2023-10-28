@@ -1,4 +1,4 @@
-import { VoterContractArtifact } from './artifacts/Voter.js';
+import { TallierContractArtifact } from './artifacts/Tallier.js';
 import {
   AccountWallet,
   AztecAddress,
@@ -14,7 +14,7 @@ import {
 import { ContractArtifact, FunctionArtifact, encodeArguments } from '@aztec/foundation/abi';
 import { FieldsOf } from '@aztec/foundation/types';
 
-export const contractArtifact: ContractArtifact = VoterContractArtifact;
+export const contractArtifact: ContractArtifact = TallierContractArtifact;
 
 export const PXE_URL: string = process.env.PXE_URL || 'http://localhost:8080';
 export const pxe: PXE = createPXEClient(PXE_URL);
@@ -55,7 +55,7 @@ export async function handleDeployClick(): Promise<string> {
 export async function handleInteractClick(contractAddress: string) {
   const [wallet, ..._rest] = await getSandboxAccountsWallets(pxe);
   const callArgs = { address: wallet.getCompleteAddress().address };
-  const getPkAbi = getFunctionAbi(VoterContractArtifact, 'getPublicKey');
+  const getPkAbi = getFunctionAbi(TallierContractArtifact, 'getPublicKey');
   const typedArgs = convertArgs(getPkAbi, callArgs);
 
   // eslint-disable-next-line no-console
