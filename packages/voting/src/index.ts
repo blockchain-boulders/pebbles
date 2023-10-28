@@ -1,4 +1,4 @@
-import { BlankContract, BlankContractArtifact } from './artifacts/Blank.js';
+import { BlankContractArtifact } from './artifacts/Blank.js';
 import {
   AccountWallet,
   AztecAddress,

@@ -38,7 +38,7 @@ describe('ZK Contract Tests', () => {
   let owner: CompleteAddress;
   let _account2: CompleteAddress;
   let _account3: CompleteAddress;
-  let contract: BlankContract;
+  let contract: Contract;
   let contractAddress: AztecAddress;
   let pxe: PXE;
 

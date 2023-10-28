@@ -81,8 +81,5 @@ export class BlankContract extends ContractBase {
     
     /** getPublicKey(address: field) */
     getPublicKey: ((address: FieldLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
-
-    /** getPublicKeyy(address: field) */
-    getPublicKeyy: ((address: FieldLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
   };
 }
