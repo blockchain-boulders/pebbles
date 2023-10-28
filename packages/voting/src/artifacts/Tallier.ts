@@ -79,10 +79,19 @@ export class TallierContract extends ContractBase {
   /** Type-safe wrappers for the public methods exposed by the contract. */
   public methods!: {
     
-    /** read_vote() */
-    read_vote: (() => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
+    /** calculateResult() */
+    calculateResult: (() => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
 
-    /** receive_vote(vote: field) */
-    receive_vote: ((vote: FieldLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
+    /** readIndex() */
+    readIndex: (() => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
+
+    /** readVote(index: field) */
+    readVote: ((index: FieldLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
+
+    /** readVoteCounter(value: field) */
+    readVoteCounter: ((value: FieldLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
+
+    /** receiveVote(vote: field, voterAddress: field) */
+    receiveVote: ((vote: FieldLike, voterAddress: FieldLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
   };
 }

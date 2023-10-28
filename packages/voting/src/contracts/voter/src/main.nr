@@ -12,10 +12,10 @@ contract Voter {
     #[aztec(private)]
     fn vote(
         vote: Field,
-        tallierAddress: AztecAddress
+        tallierAddress: AztecAddress,
     ) -> Field{
-        let selector = compute_selector("receive_vote(Field)");
-        let _void = context.call_public_function(tallierAddress.address, selector, [vote]);
+        let selector = compute_selector("receiveVote(Field,Field)");
+        let _void = context.call_public_function(tallierAddress.address, selector, [vote, context.msg_sender()]);
     }
     
 }

@@ -11,6 +11,7 @@ import {
   TxStatus,
   Wallet,
   createPXEClient,
+  getSandboxAccountsWallets,
   waitForSandbox,
 } from '@aztec/aztec.js';
 import { createDebugLogger } from '@aztec/foundation/log';
@@ -52,6 +53,7 @@ describe('ZK Contract Tests', () => {
   let voterContractAddress: AztecAddress;
   let tallierContractAddress: AztecAddress;
   let pxe: PXE;
+  let wallets: AccountWallet[];
 
   beforeAll(async () => {
     pxe = await setupSandbox();
@@ -59,21 +61,33 @@ describe('ZK Contract Tests', () => {
     [owner, _account2, _account3] = accounts;
 
     wallet = await getWallet(owner, pxe);
+    wallets = await getSandboxAccountsWallets(pxe);
 
     tallierContract = await deployTallierContract(owner, wallet, pxe);
     tallierContractAddress = tallierContract.address
 
     voterContract = await deployVoterContract(owner, wallet, pxe);
     voterContractAddress = voterContract.address;
+    console.log(voterContractAddress.toBigInt())
+    console.log(tallierContractAddress.toBigInt())
   }, 60000);
 
   test('sending a vote', async () => {
-    const prevValue = await tallierContract.methods.read_vote().view();
-    console.log("PREV VALUE: ", prevValue)
-    const callTxReceipt = await voterContract.methods.vote(1, tallierContractAddress).send().wait()
+    console.log(wallets.map(x=> x.getAddress().toBigInt()))
+    const prevVote0 = await tallierContract.methods.readVoteCounter(0).view();
+    const prevVote1 = await tallierContract.methods.readVoteCounter(1).view();    
+    console.log("PREV VALUE: ", prevVote0, prevVote1)
+    
+    const callTxReceipt = await voterContract.withWallet(wallets[0]).methods.vote(1, tallierContractAddress).send().wait()
+    const callTxReceipt2 = await voterContract.withWallet(wallets[1]).methods.vote(0, tallierContractAddress).send().wait()
+    console.log("WALLET 0: ", await tallierContract.methods.readVote(0).view())
+    console.log("WALLET 1: ", await tallierContract.methods.readVote(1).view())
+    // await voterContract.withWallet()
+    const callTxReceipt3 = await tallierContract.methods.calculateResult().send().wait()
 
-    const vote = await tallierContract.methods.read_vote().view();
-    console.log("AFTER VALUE: ", vote)
+    const vote0 = await tallierContract.methods.readVoteCounter(0).view();
+    const vote1 = await tallierContract.methods.readVoteCounter(1).view();
+    console.log("RESULTS: ", vote0, vote1)
 
     expect(callTxReceipt.status).toBe(TxStatus.MINED);
   }, 40000);

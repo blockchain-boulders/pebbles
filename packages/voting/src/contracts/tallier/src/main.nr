@@ -2,21 +2,62 @@ contract Tallier {
 
     use dep::aztec::{
         context::{PublicContext, Context},
-        state_vars::{public_state::PublicState},
+        state_vars::{public_state::PublicState, map::Map},
         types::type_serialization::{
             field_serialization::{FieldSerializationMethods, FIELD_SERIALIZED_LEN},
-        }
+        },
+        types::address::{AztecAddress},
+
     };
 
-
     struct Storage {
-        vote1: PublicState<Field, FIELD_SERIALIZED_LEN>
+        votes: Map<PublicState<Field, FIELD_SERIALIZED_LEN>>,
+        voterAddresses: Map<PublicState<Field, FIELD_SERIALIZED_LEN>>,
+        voteCounter: PublicState<Field, FIELD_SERIALIZED_LEN>,
+        votingResults: Map<PublicState<Field, FIELD_SERIALIZED_LEN>>,
     }
 
     impl Storage {
         fn init(context: Context) -> Self {
             Storage {
-                vote1: PublicState::new(context, 1, FieldSerializationMethods)
+                votes: Map::new(
+                    context,
+                    1,
+                    |context, slot| {
+                        PublicState::new(
+                            context,
+                            slot,
+                            FieldSerializationMethods,
+                        )
+                    },
+                ),
+                voterAddresses: Map::new(
+                    context,
+                    2,
+                    |context, slot| {
+                        PublicState::new(
+                            context,
+                            slot,
+                            FieldSerializationMethods,
+                        )
+                    },
+                ),
+                voteCounter: PublicState::new(
+                    context,
+                    3,
+                    FieldSerializationMethods,
+                ),
+                votingResults: Map::new(
+                    context,
+                    4,
+                    |context, slot| {
+                        PublicState::new(
+                            context,
+                            slot,
+                            FieldSerializationMethods,
+                        )
+                    },
+                ),
             }
         }
     }
@@ -25,13 +66,37 @@ contract Tallier {
     fn constructor() {}
 
     #[aztec(public)]
-    fn receive_vote(
+    fn receiveVote(
         vote: Field,
-    ) -> Field{
-        storage.vote1.write(vote);
+        voterAddress: Field
+    ) {
+        storage.voterAddresses.at(storage.voteCounter.read()).write(voterAddress);
+        storage.votes.at(voterAddress).write(vote);
+        storage.voteCounter.write(storage.voteCounter.read() + 1);
     }
 
-    unconstrained fn read_vote() -> Field {
-        storage.vote1.read()
+    #[aztec(public)]
+        fn calculateResult() {
+            for i in 0..storage.voteCounter.read() {
+                let voter = storage.voterAddresses.at(i).read();
+                let vote = storage.votes.at(voter).read();
+                storage.votingResults.at(vote).write(storage.votingResults.at(vote).read() + 1);
+            }
+    }
+
+    
+
+    unconstrained fn readVoteCounter(value: Field) -> Field {
+        storage.votingResults.at(value).read()
+    }
+
+    unconstrained fn readVote(index: Field) -> ([Field; 2]) {
+        let voter = storage.voterAddresses.at(index).read();
+        let vote = storage.votes.at(voter).read();
+        [voter, vote]
+    }
+
+    unconstrained fn readIndex() -> Field {
+        storage.voteCounter.read()
     }
 }
