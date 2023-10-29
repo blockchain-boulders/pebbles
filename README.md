@@ -8,7 +8,7 @@ Two ways of voting on Aztec Network. To run, refer to "Setup" below.
     b. the voter creates a voter contract
     c. the voter calls a private method, in voter contract, with their vote
     d. the voter contract calls the tallier contract public method with the vote
-    e. the tallier contract stores the vote in its' private state
+    e. the tallier contract stores the vote in its' private state (⚠ in current implementation it is in public state).
     f. the tallier ends the vote by calling the public summerizing method on the tallier contract
     g. the tallier contract has the result stored in its' public state
 1. the second one, integrated only with typescript-tests, is called phased voting. It requires a third party, but he is only trusted to run, finish and cancel the process. Not to see any of the actual votes.
