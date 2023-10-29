@@ -4,25 +4,26 @@ Two ways of voting on Aztec Network written for ETH London hackathon 2023. To ru
 ## Voting prrocesses
 ### MACI-like
 The first one, which is also integrated with the UI, is with a trusted third party. The third party is only trusted with the identity behind the votes. He can not forge a fake result. The pros and cons are very similar to [how MACI would be done](https://medium.com/privacy-scaling-explorations/a-technical-introduction-to-maci-1-0-db95c3a9439a) with ZK-circuits on a public chain.
-  Voting-process:
-    a. the organizer creates a tallier contract
-    b. the voter creates a voter contract
-    c. the voter calls a private method, in voter contract, with their vote
-    d. the voter contract calls the tallier contract public method with the vote
-    e. the tallier contract stores the vote in its' private state (⚠ in current implementation it is in public state).
-    f. the tallier ends the vote by calling the public summerizing method on the tallier contract
-    g. the tallier contract has the result stored in its' public state
+#### process:
+1. the organizer creates a tallier contract
+2. the voter creates a voter contract
+3. the voter calls a private method, in voter contract, with their vote
+4. the voter contract calls the tallier contract public method with the vote
+5. the tallier contract stores the vote in its' private state (⚠ in current implementation it is in public state).
+6. the tallier ends the vote by calling the public summerizing method on the tallier contract
+7. the tallier contract has the result stored in its' public state
+
 TODO: image here
 
 
 ### Phased voting
 The second one, integrated only with typescript-tests, is called phased voting. It requires a third party, but he is only trusted to run, finish and cancel the process. Not to see any of the actual votes.
-  Voting-process:
-    a. the organizer creates a phase voting contract and assigns a responsible third party
-    b. voters submit their votes to the voting contract, these votes are hidden but can not longer be changed after submission
-    c. third party closes the voting phase
-    d. voters burn their locked votes and reveal their vote, without revealing their own identity
-    e. everyone can query the results of the voting
+#### process:
+1. the organizer creates a phase voting contract and assigns a responsible third party
+2. voters submit their votes to the voting contract, these votes are hidden but can not longer be changed after submission
+3. third party closes the voting phase
+4. voters burn their locked votes and reveal their vote, without revealing their own identity
+5. everyone can query the results of the voting
 
 ![](./images/phasedvoting.png)
 
