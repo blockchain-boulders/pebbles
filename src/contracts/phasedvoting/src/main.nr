@@ -64,10 +64,7 @@ contract PhasedVoting {
     fn lock_vote(vote: Field) {
         let selector = compute_selector("_assert_open()");
         context.call_public_function(context.this_address(), selector, []);
-
-        let selector = compute_selector("_assert_valid_topic(Field)");
-        context.call_public_function(context.this_address(), selector, [vote]);
-
+        
         let notes = storage.votes.get_notes(NoteGetterOptions::new().select(1, context.msg_sender()));
         for note in notes {
             if note.is_some() {
