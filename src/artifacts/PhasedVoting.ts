@@ -55,14 +55,14 @@ export class PhasedVotingContract extends ContractBase {
   /**
    * Creates a tx to deploy a new instance of this contract.
    */
-  public static deploy(wallet: Wallet, admin: AztecAddressLike) {
+  public static deploy(wallet: Wallet, admin: AztecAddressLike, topic_count: FieldLike) {
     return new DeployMethod<PhasedVotingContract>(Point.ZERO, wallet, PhasedVotingContractArtifact, Array.from(arguments).slice(1));
   }
 
   /**
    * Creates a tx to deploy a new instance of this contract using the specified public key to derive the address.
    */
-  public static deployWithPublicKey(publicKey: PublicKey, wallet: Wallet, admin: AztecAddressLike) {
+  public static deployWithPublicKey(publicKey: PublicKey, wallet: Wallet, admin: AztecAddressLike, topic_count: FieldLike) {
     return new DeployMethod<PhasedVotingContract>(publicKey, wallet, PhasedVotingContractArtifact, Array.from(arguments).slice(2));
   }
   
@@ -88,11 +88,14 @@ export class PhasedVotingContract extends ContractBase {
     /** _assert_open() */
     _assert_open: (() => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
 
+    /** _assert_valid_topic(topic: field) */
+    _assert_valid_topic: ((topic: FieldLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
+
     /** _close_voting_room() */
     _close_voting_room: (() => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
 
-    /** _initialize(admin: struct) */
-    _initialize: ((admin: AztecAddressLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
+    /** _initialize(admin: struct, topic_count: field) */
+    _initialize: ((admin: AztecAddressLike, topic_count: FieldLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
 
     /** _update_vote_result(index: field) */
     _update_vote_result: ((index: FieldLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;

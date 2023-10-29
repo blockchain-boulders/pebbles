@@ -25,6 +25,7 @@ contract PhasedVoting {
         result: Map<PublicState<Field, FIELD_SERIALIZED_LEN>>,
         closed: PublicState<bool, BOOL_SERIALIZED_LEN>,
         admin: PublicState<AztecAddress, AZTEC_ADDRESS_SERIALIZED_LEN>,
+        topic_count: PublicState<Field, FIELD_SERIALIZED_LEN>,
     }
 
     impl Storage {
@@ -40,6 +41,7 @@ contract PhasedVoting {
                     4,
                     AztecAddressSerializationMethods,
                 ),
+                topic_count: PublicState::new(context, 5, FieldSerializationMethods),
             }
         }
     }
@@ -49,9 +51,9 @@ contract PhasedVoting {
     ///
 
     #[aztec(private)]
-    fn constructor(admin: AztecAddress) {
-        let selector = compute_selector("_initialize((Field))");
-        context.call_public_function(context.this_address(), selector, [admin.address]);
+    fn constructor(admin: AztecAddress, topic_count: Field) {
+        let selector = compute_selector("_initialize((Field),Field)");
+        context.call_public_function(context.this_address(), selector, [admin.address, topic_count]);
     }
 
     ///
@@ -60,15 +62,18 @@ contract PhasedVoting {
 
     #[aztec(private)]
     fn lock_vote(vote: Field) {
+        let selector = compute_selector("_assert_open()");
+        context.call_public_function(context.this_address(), selector, []);
+
+        let selector = compute_selector("_assert_valid_topic(Field)");
+        context.call_public_function(context.this_address(), selector, [vote]);
+
         let notes = storage.votes.get_notes(NoteGetterOptions::new().select(1, context.msg_sender()));
         for note in notes {
             if note.is_some() {
                 assert(false, "Account has already voted.");
             }
         }
-
-        let selector = compute_selector("_assert_open()");
-        context.call_public_function(context.this_address(), selector, []);
 
         let mut locked_vote = LockedVoteNote::new(vote, AztecAddress::new(context.msg_sender()));
         storage.votes.insert(&mut locked_vote, true);
@@ -107,6 +112,18 @@ contract PhasedVoting {
     ///
 
     #[aztec(public)]
+    internal fn _initialize(admin: AztecAddress, topic_count: Field) {
+        storage.topic_count.write(topic_count);
+        storage.admin.write(admin);
+        storage.closed.write(false);
+    }
+
+    #[aztec(public)]
+    internal fn _assert_valid_topic(topic: Field) {
+        assert(topic as u8 > storage.topic_count.read() as u8, "Topic does not exist.");
+    }
+
+    #[aztec(public)]
     internal fn _assert_open() {
         assert(storage.closed.read() == false, "Voting room is closed.");
     }
@@ -119,12 +136,6 @@ contract PhasedVoting {
     #[aztec(public)]
     internal fn _assert_authorized(caller: AztecAddress) {
         assert(storage.admin.read().eq(caller), "Account not authorized to close voting room.");
-    }
-
-    #[aztec(public)]
-    internal fn _initialize(admin: AztecAddress) {
-        storage.admin.write(admin);
-        storage.closed.write(false);
     }
 
     #[aztec(public)]
