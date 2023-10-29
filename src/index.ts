@@ -27,7 +27,7 @@ export const pxe: PXE = createPXEClient(PXE_URL);
 
 let contractAddresses: ContractsAddresses = { tallierContractAztecAddress: '', voteContractAztecAddress: '' };
 const WALLETS = await getSandboxAccountsWallets(pxe);
-let selectedWallet;
+let selectedWallet: any;
 
 const isContractDeployed = (): boolean => {
   if (contractAddresses.voteContractAztecAddress === '') {
@@ -67,9 +67,15 @@ if (typeof document !== 'undefined') {
     option.text = '' + i;
     dropdown.appendChild(option);
   }
+
   dropdown.addEventListener('change', () => {
     const selectedText = dropdown.options[dropdown.selectedIndex].text;
     selectedWallet = WALLETS[Number(selectedText)];
+  });
+
+  document.getElementById('getResults')?.addEventListener('click', async () => {
+    const result = await handleGetResultsClick(contractAddresses.tallierContractAztecAddress);
+    console.log(result)
   });
 }
 
@@ -105,8 +111,7 @@ export async function handleDeployContractsClicks(): Promise<ContractsAddresses>
 export async function handleVoteClick(vote: 1 | 2) {
   console.log('🔄 - Voting');
   const contractFunctionName = 'vote';
-  const [wallet, ..._rest] = await getSandboxAccountsWallets(pxe);
-  const callArgs = { vote: 1, tallierAddress: contractAddresses.tallierContractAztecAddress };
+  const callArgs = { vote: vote, tallierAddress: contractAddresses.tallierContractAztecAddress };
   const getPkAbi = getFunctionAbi(VoterContractArtifact, contractFunctionName);
   console.log(getPkAbi);
   const typedArgs = convertArgs(getPkAbi, callArgs);
@@ -120,7 +125,50 @@ export async function handleVoteClick(vote: 1 | 2) {
     contractFunctionName,
     typedArgs,
     pxe,
-    wallet.getCompleteAddress(),
+    selectedWallet.getCompleteAddress(),
+  );
+}
+export async function handleGetResultsClick(contractAddress: string) {
+  await calculateResult(contractAddress)
+  const votes1 = await readVotingCounter(contractAddress, '1');
+  const votes2 = await readVotingCounter(contractAddress, '2');
+  return {
+    1: votes1,
+    2: votes2
+  }
+}
+
+export async function calculateResult(contractAddress: string) {
+  const callArgs = {};
+  const getPkAbi = getFunctionAbi(TallierContractArtifact, 'calculateResult');
+  const typedArgs = convertArgs(getPkAbi, callArgs);
+
+  // eslint-disable-next-line no-console
+  console.log('Calculating result');
+
+  await callContractFunction(
+    AztecAddress.fromString(contractAddress),
+    tallierContractArtifact,
+    'calculateResult',
+    typedArgs,
+    pxe,
+    selectedWallet.getCompleteAddress(),
+  );
+}
+
+export async function readVotingCounter(contractAddress: string, value: string) {
+  const callArgs = { value: value };
+  const getPkAbi = getFunctionAbi(TallierContractArtifact, 'readVoteCounter');
+  const typedArgs = convertArgs(getPkAbi, callArgs);
+
+  return await callContractFunction(
+    AztecAddress.fromString(contractAddress),
+    tallierContractArtifact,
+    'readVoteCounter',
+    typedArgs,
+    pxe,
+    selectedWallet.getCompleteAddress(),
+    true
   );
 }
 
@@ -137,6 +185,7 @@ export async function callContractFunction(
   typedArgs: any[], // for the exposed functions, this is an array of field elements Fr[]
   pxe: PXE,
   wallet: CompleteAddress,
+  viewFunction: boolean = false,
 ): Promise<FieldsOf<TxReceipt>> {
   // selectedWallet is how we specify the "sender" of the transaction
   const selectedWallet = await getWallet(wallet, pxe);
@@ -146,12 +195,12 @@ export async function callContractFunction(
   // which provides an object with methods corresponding to the noir contract functions
   // that are named and typed and can be called directly.
   const contract = await Contract.at(address, artifact, selectedWallet);
-  let transaction;
-  transaction = contract.methods[functionName](...typedArgs)
-    .send()
-    .wait();
-  console.log('✅ - Voted');
-  return transaction;
+
+  return viewFunction
+    ? contract.methods[functionName](...typedArgs).view()
+    : contract.methods[functionName](...typedArgs)
+        .send()
+        .wait();
 }
 
 /**
@@ -192,7 +241,6 @@ export async function deployContract(
 
 export function convertArgs(functionArtifact: FunctionArtifact, args: any): Fr[] {
   const untypedArgs = functionArtifact.parameters.map(param => {
-    console.log(param.type.kind);
     switch (param.type.kind) {
       case 'field':
         // hack: addresses are stored as string in the form to avoid bigint compatibility issues with formik
@@ -205,6 +253,5 @@ export function convertArgs(functionArtifact: FunctionArtifact, args: any): Fr[]
         return args[param.name];
     }
   });
-  console.log(untypedArgs);
   return encodeArguments(functionArtifact, untypedArgs);
 }
