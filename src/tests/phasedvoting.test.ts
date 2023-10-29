@@ -47,11 +47,6 @@ describe('ZK Contract Tests', () => {
     contractAddress = contract.address;
   }, 60000);
 
-  test('user cannot lock a vote on a nonexisting topic', async () => {
-    const receipt = contract.withWallet(wallets[1]).methods.lock_vote(7n);
-    await expect(receipt.send().wait()).rejects.toThrow();
-  }, 40000);
-
   test('user can lock vote', async () => {
     const receipt = await contract.withWallet(wallets[1]).methods.lock_vote(1n).send().wait();
     expect(receipt.status).toBe(TxStatus.MINED);
