@@ -13,7 +13,7 @@ The first one, which is also integrated with the UI, is with a trusted third par
 6. the tallier ends the vote by calling the public summerizing method on the tallier contract
 7. the tallier contract has the result stored in its' public state
 
-TODO: image here
+![](./images/talliedvoting.png)
 
 
 ### Phased voting
