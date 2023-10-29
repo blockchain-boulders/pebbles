@@ -60,6 +60,13 @@ contract PhasedVoting {
 
     #[aztec(private)]
     fn lock_vote(vote: Field) {
+        let notes = storage.votes.get_notes(NoteGetterOptions::new().select(1, context.msg_sender()));
+        for note in notes {
+            if note.is_some() {
+                assert(false, "Account has already voted.");
+            }
+        }
+
         let selector = compute_selector("_assert_open()");
         context.call_public_function(context.this_address(), selector, []);
 

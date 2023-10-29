@@ -52,6 +52,11 @@ describe('ZK Contract Tests', () => {
     expect(receipt.status).toBe(TxStatus.MINED);
   }, 40000);
 
+  test('user cannot lock vote twice', async () => {
+    const lockVote = contract.withWallet(wallets[1]).methods.lock_vote(1n);
+    await expect(lockVote.send().wait()).rejects.toThrow();
+  }, 40000);
+
   test('result cannot be viewed before voting is closed', async () => {
     const result = contract.withWallet(wallets[1]).methods.get_result(1);
     await expect(result.view()).rejects.toThrow();
@@ -63,7 +68,7 @@ describe('ZK Contract Tests', () => {
   }, 4000);
 
   test('result should reflect votes', async () => {
-    const voteReceipt = await contract.withWallet(wallets[1]).methods.lock_vote(1n).send().wait();
+    const voteReceipt = await contract.withWallet(wallets[2]).methods.lock_vote(1n).send().wait();
     expect(voteReceipt.status).toBe(TxStatus.MINED);
 
     const closingReceipt = await contract.withWallet(wallets[0]).methods.close_voting_room().send().wait();
