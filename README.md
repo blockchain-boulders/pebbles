@@ -13,10 +13,11 @@ Two ways of voting on Aztec Network. To run, refer to "Setup" below.
     g. the tallier contract has the result stored in its' public state
 1. the second one, integrated only with typescript-tests, is called phased voting. It requires a third party, but he is only trusted to run, finish and cancel the process. Not to see any of the actual votes.
   Voting-process:
-    TODO: Sebas
-
-
-
+    a. the organizer creates a phase voting contract and assigns a responsible third party
+    b. voters submit their votes to the voting contract, these votes are hidden but can not longer be changed after submission
+    c. third party closes the voting phase
+    d. voters burn their locked votes and reveal their vote, without revealing their own identity
+    e. everyone can query the results of the voting
 
 Everything below this line is the README from "Aztec Blank Box"-template.
 ---
