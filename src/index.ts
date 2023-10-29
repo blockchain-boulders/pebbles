@@ -26,6 +26,8 @@ export const PXE_URL: string = process.env.PXE_URL || 'http://localhost:8080';
 export const pxe: PXE = createPXEClient(PXE_URL);
 
 let contractAddress: ContractsAddresses = { tallierContractAztecAddress: '', voteContractAztecAddress: '' };
+const WALLETS = await getSandboxAccountsWallets(pxe);
+let selectedWallet;
 
 // interaction with the buttons, but conditional check so node env can also import from this file
 if (typeof document !== 'undefined') {
@@ -39,6 +41,21 @@ if (typeof document !== 'undefined') {
     const interactionResult = await handleVoteClick(contractAddress.voteContractAztecAddress);
     // eslint-disable-next-line no-console
     console.log('Interaction transaction succeeded', interactionResult);
+  });
+
+  // Get a reference to the select element
+  const dropdown = document.getElementById('dropdown') as HTMLSelectElement;
+
+  // Populate the select element with options from the array
+  for (var i = 0; i < WALLETS.length; i++) {
+    var option = document.createElement('option');
+    option.value = '' + i;
+    option.text = '' + i;
+    dropdown.appendChild(option);
+  }
+  dropdown.addEventListener('change', () => {
+    const selectedText = dropdown.options[dropdown.selectedIndex].text;
+    selectedWallet = WALLETS[Number(selectedText)];
   });
 }
 
