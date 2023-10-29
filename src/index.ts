@@ -36,6 +36,13 @@ const isContractDeployed = (): boolean => {
   }
   return true;
 };
+const isWalletSelected = (): boolean => {
+  if (!selectedWallet) {
+    alert('Please select a wallet first');
+    return false;
+  }
+  return true;
+};
 // interaction with the buttons, but conditional check so node env can also import from this file
 if (typeof document !== 'undefined') {
   document.getElementById('deploy')?.addEventListener('click', async () => {
@@ -45,14 +52,14 @@ if (typeof document !== 'undefined') {
   });
 
   document.getElementById('vote1')?.addEventListener('click', async () => {
-    if (!isContractDeployed()) return;
+    if (!isContractDeployed() || !isWalletSelected()) return;
     const interactionResult = await handleVoteClick(1);
     // eslint-disable-next-line no-console
     console.log('Interaction transaction succeeded', interactionResult);
   });
 
   document.getElementById('vote2')?.addEventListener('click', async () => {
-    if (!isContractDeployed()) return;
+    if (!isContractDeployed() || !isWalletSelected()) return;
     const interactionResult = await handleVoteClick(2);
     // eslint-disable-next-line no-console
     console.log('Interaction transaction succeeded', interactionResult);
@@ -74,6 +81,8 @@ if (typeof document !== 'undefined') {
   });
 
   document.getElementById('getResults')?.addEventListener('click', async () => {
+    if (!isContractDeployed() || !isWalletSelected()) return;
+
     const result = await handleGetResultsClick(contractAddresses.tallierContractAztecAddress);
     console.log(result)
   });
