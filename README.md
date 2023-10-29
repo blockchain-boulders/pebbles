@@ -1,3 +1,26 @@
+# Pebbles
+Two ways of voting on Aztec Network. To run, refer to "Setup" below.
+
+
+1. the first one, which is also integrated with the UI, is with a trusted third party. The third party is only trusted with the identity behind the votes. He can not forge a fake result. The pros and cons are very similar to how MACI would be done with ZK-circuits on a public chain.
+  Voting-process:
+    a. the organizer creates a tallier contract
+    b. the voter creates a voter contract
+    c. the voter calls a private method, in voter contract, with their vote
+    d. the voter contract calls the tallier contract public method with the vote
+    e. the tallier contract stores the vote in its' private state
+    f. the tallier ends the vote by calling the public summerizing method on the tallier contract
+    g. the tallier contract has the result stored in its' public state
+1. the second one, integrated only with typescript-tests, is called phased voting. It requires a third party, but he is only trusted to run, finish and cancel the process. Not to see any of the actual votes.
+  Voting-process:
+    TODO: Sebas
+
+
+
+
+Everything below this line is the README from "Aztec Blank Box"-template.
+---
+
 This is a minimal [Aztec](https://aztec.network/) Noir smart contract and frontend bootstrapped with [`aztec-cli unbox`](https://github.com/AztecProtocol/aztec-packages/tree/master/yarn-project/cli). It is recommended you use the `aztec-cli unbox blank` command so that the repository is copied with needed modifications from the monorepo subpackage.
 
 ## Setup
