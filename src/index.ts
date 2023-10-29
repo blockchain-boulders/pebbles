@@ -1,4 +1,4 @@
-import { TallierContractArtifact } from './artifacts/Tallier.js';
+import { TallierContract, TallierContractArtifact } from './artifacts/Tallier.js';
 import { VoterContractArtifact } from './artifacts/Voter.js';
 import {
   AccountWallet,
@@ -25,20 +25,20 @@ export const voteContractArtifact: ContractArtifact = VoterContractArtifact;
 export const PXE_URL: string = process.env.PXE_URL || 'http://localhost:8080';
 export const pxe: PXE = createPXEClient(PXE_URL);
 
-let contractAddress: ContractsAddresses = { tallierContractAztecAddress: '', voteContractAztecAddress: '' };
+let contractAddresses: ContractsAddresses = { tallierContractAztecAddress: '', voteContractAztecAddress: '' };
 const WALLETS = await getSandboxAccountsWallets(pxe);
 let selectedWallet;
 
 // interaction with the buttons, but conditional check so node env can also import from this file
 if (typeof document !== 'undefined') {
   document.getElementById('deploy')?.addEventListener('click', async () => {
-    contractAddress = await handleDeployContractsClicks();
+    contractAddresses = await handleDeployContractsClicks();
     // eslint-disable-next-line no-console
-    console.log('Deploy Succeeded, contract deployed at', contractAddress);
+    console.log('Deploy Succeeded, contract deployed at', contractAddresses);
   });
 
   document.getElementById('vote')?.addEventListener('click', async () => {
-    const interactionResult = await handleVoteClick(contractAddress.voteContractAztecAddress);
+    const interactionResult = await handleVoteClick(contractAddresses.voteContractAztecAddress);
     // eslint-disable-next-line no-console
     console.log('Interaction transaction succeeded', interactionResult);
   });
@@ -92,10 +92,9 @@ export async function handleVoteClick(contractAddress: string) {
   console.log('🔄 - Voting');
   const contractFunctionName = 'vote';
   const [wallet, ..._rest] = await getSandboxAccountsWallets(pxe);
-  const callArgs = { address: wallet.getCompleteAddress().address.toString() };
+  const callArgs = { vote: 1, tallierAddress: contractAddresses.tallierContractAztecAddress };
   const getPkAbi = getFunctionAbi(VoterContractArtifact, contractFunctionName);
-  console.log('getPkAbi', getPkAbi);
-  console.log('🔄 - Converting Args');
+  console.log(getPkAbi);
   const typedArgs = convertArgs(getPkAbi, callArgs);
 
   // eslint-disable-next-line no-console
