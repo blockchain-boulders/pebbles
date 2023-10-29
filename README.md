@@ -19,9 +19,9 @@ The first one, which is also integrated with the UI, is with a trusted third par
 ### Phased voting
 The second one, integrated only with typescript-tests, is called phased voting. It requires a third party, but he is only trusted to run, finish and cancel the process. Not to see any of the actual votes.
 #### process:
-1. the organizer creates a phase voting contract and assigns a responsible third party
+1. the organizer creates a phase voting contract and assigns a responsible third party or itself as administrator
 2. voters submit their votes to the voting contract, these votes are hidden but can not longer be changed after submission
-3. third party closes the voting phase
+3. administrator closes the voting phase
 4. voters burn their locked votes and reveal their vote, without revealing their own identity
 5. everyone can query the results of the voting
 
