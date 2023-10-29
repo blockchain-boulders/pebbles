@@ -24,7 +24,7 @@ The second one, integrated only with typescript-tests, is called phased voting. 
     d. voters burn their locked votes and reveal their vote, without revealing their own identity
     e. everyone can query the results of the voting
 
-TODO: image here
+![](./images/phasedvoting.png)
 
 ## Code structure
 As mentioned above there are two different implementations when you run `yarn test:integration` you run tests for both. When you run `yarn start:dev` you will run a UI that is integrated with the "MACI-like" voting process.
