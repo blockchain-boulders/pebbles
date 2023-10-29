@@ -29,6 +29,13 @@ let contractAddresses: ContractsAddresses = { tallierContractAztecAddress: '', v
 const WALLETS = await getSandboxAccountsWallets(pxe);
 let selectedWallet;
 
+const isContractDeployed = (): boolean => {
+  if (contractAddresses.voteContractAztecAddress === '') {
+    alert('Please deploy contracts first');
+    return false;
+  }
+  return true;
+};
 // interaction with the buttons, but conditional check so node env can also import from this file
 if (typeof document !== 'undefined') {
   document.getElementById('deploy')?.addEventListener('click', async () => {
@@ -37,12 +44,19 @@ if (typeof document !== 'undefined') {
     console.log('Deploy Succeeded, contract deployed at', contractAddresses);
   });
 
-  document.getElementById('vote')?.addEventListener('click', async () => {
-    const interactionResult = await handleVoteClick(contractAddresses.voteContractAztecAddress);
+  document.getElementById('vote1')?.addEventListener('click', async () => {
+    if (!isContractDeployed()) return;
+    const interactionResult = await handleVoteClick(1);
     // eslint-disable-next-line no-console
     console.log('Interaction transaction succeeded', interactionResult);
   });
 
+  document.getElementById('vote2')?.addEventListener('click', async () => {
+    if (!isContractDeployed()) return;
+    const interactionResult = await handleVoteClick(2);
+    // eslint-disable-next-line no-console
+    console.log('Interaction transaction succeeded', interactionResult);
+  });
   // Get a reference to the select element
   const dropdown = document.getElementById('dropdown') as HTMLSelectElement;
 
@@ -88,7 +102,7 @@ export async function handleDeployContractsClicks(): Promise<ContractsAddresses>
   };
 }
 
-export async function handleVoteClick(contractAddress: string) {
+export async function handleVoteClick(vote: 1 | 2) {
   console.log('🔄 - Voting');
   const contractFunctionName = 'vote';
   const [wallet, ..._rest] = await getSandboxAccountsWallets(pxe);
@@ -101,7 +115,7 @@ export async function handleVoteClick(contractAddress: string) {
   console.log('Interacting with Contract');
 
   return await callContractFunction(
-    AztecAddress.fromString(contractAddress),
+    AztecAddress.fromString(contractAddresses.voteContractAztecAddress),
     voteContractArtifact,
     contractFunctionName,
     typedArgs,
@@ -178,16 +192,19 @@ export async function deployContract(
 
 export function convertArgs(functionArtifact: FunctionArtifact, args: any): Fr[] {
   const untypedArgs = functionArtifact.parameters.map(param => {
+    console.log(param.type.kind);
     switch (param.type.kind) {
       case 'field':
         // hack: addresses are stored as string in the form to avoid bigint compatibility issues with formik
         // convert those back to bigints before turning into Fr
         return BigInt(args[param.name]);
+      case 'struct':
+        return AztecAddress.fromString(args[param.name]);
       default:
         // need more testing on other types
         return args[param.name];
     }
   });
-
+  console.log(untypedArgs);
   return encodeArguments(functionArtifact, untypedArgs);
 }
