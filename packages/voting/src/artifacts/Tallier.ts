@@ -82,12 +82,6 @@ export class TallierContract extends ContractBase {
     /** calculateResult() */
     calculateResult: (() => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
 
-    /** readIndex() */
-    readIndex: (() => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
-
-    /** readVote(index: field) */
-    readVote: ((index: FieldLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
-
     /** readVoteCounter(value: field) */
     readVoteCounter: ((value: FieldLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
 

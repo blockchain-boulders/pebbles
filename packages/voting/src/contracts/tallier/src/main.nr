@@ -70,6 +70,9 @@ contract Tallier {
         vote: Field,
         voterAddress: Field
     ) {
+        assert(vote as u32 > 0, "vote should be greater than 0");
+        assert(storage.votes.at(voterAddress).read() as u32 <= 0, "already voted");
+
         storage.voterAddresses.at(storage.voteCounter.read()).write(voterAddress);
         storage.votes.at(voterAddress).write(vote);
         storage.voteCounter.write(storage.voteCounter.read() + 1);
@@ -88,15 +91,5 @@ contract Tallier {
 
     unconstrained fn readVoteCounter(value: Field) -> Field {
         storage.votingResults.at(value).read()
-    }
-
-    unconstrained fn readVote(index: Field) -> ([Field; 2]) {
-        let voter = storage.voterAddresses.at(index).read();
-        let vote = storage.votes.at(voter).read();
-        [voter, vote]
-    }
-
-    unconstrained fn readIndex() -> Field {
-        storage.voteCounter.read()
     }
 }

@@ -14,6 +14,8 @@ contract Voter {
         vote: Field,
         tallierAddress: AztecAddress,
     ) -> Field{
+        assert(vote as u32 > 0, "vote should be greater than 0");
+
         let selector = compute_selector("receiveVote(Field,Field)");
         let _void = context.call_public_function(tallierAddress.address, selector, [vote, context.msg_sender()]);
     }
