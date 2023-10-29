@@ -1,4 +1,5 @@
 import { TallierContractArtifact } from './artifacts/Tallier.js';
+import { VoterContractArtifact } from './artifacts/Voter.js';
 import {
   AccountWallet,
   AztecAddress,
@@ -13,49 +14,71 @@ import {
 } from '@aztec/aztec.js';
 import { ContractArtifact, FunctionArtifact, encodeArguments } from '@aztec/foundation/abi';
 import { FieldsOf } from '@aztec/foundation/types';
+interface ContractsAddresses {
+  tallierContractAztecAddress: string;
+  voteContractAztecAddress: string;
+}
 
-export const contractArtifact: ContractArtifact = TallierContractArtifact;
+export const tallierContractArtifact: ContractArtifact = TallierContractArtifact;
+export const voteContractArtifact: ContractArtifact = VoterContractArtifact;
 
 export const PXE_URL: string = process.env.PXE_URL || 'http://localhost:8080';
 export const pxe: PXE = createPXEClient(PXE_URL);
 
-let contractAddress: string = '';
+let contractAddress: ContractsAddresses = { tallierContractAztecAddress: '', voteContractAztecAddress: '' };
 
 // interaction with the buttons, but conditional check so node env can also import from this file
 if (typeof document !== 'undefined') {
   document.getElementById('deploy')?.addEventListener('click', async () => {
-    contractAddress = await handleDeployClick();
+    contractAddress = await handleDeployContractsClicks();
     // eslint-disable-next-line no-console
     console.log('Deploy Succeeded, contract deployed at', contractAddress);
   });
 
-  document.getElementById('interact')?.addEventListener('click', async () => {
-    const interactionResult = await handleInteractClick(contractAddress);
+  document.getElementById('vote')?.addEventListener('click', async () => {
+    const interactionResult = await handleVoteClick(contractAddress.voteContractAztecAddress);
     // eslint-disable-next-line no-console
     console.log('Interaction transaction succeeded', interactionResult);
   });
 }
 
-export async function handleDeployClick(): Promise<string> {
+export async function handleDeployContractsClicks(): Promise<ContractsAddresses> {
   // eslint-disable-next-line no-console
-  console.log('Deploying Contract');
+  console.log('🔄 - Deploying Tallier Contract');
   const [wallet, ..._rest] = await getSandboxAccountsWallets(pxe);
 
-  const contractAztecAddress = await deployContract(
+  const tallierContractAztecAddress = await deployContract(
     wallet.getCompleteAddress(),
-    contractArtifact,
+    TallierContractArtifact,
     [],
     Fr.random(),
     pxe,
   );
+  console.log('✅ - Tallier Contract Deployed ');
+  console.log('🔄 - Deploying Voter Contract');
 
-  return contractAztecAddress.toString();
+  const voteContractAztecAddress = await deployContract(
+    wallet.getCompleteAddress(),
+    VoterContractArtifact,
+    [],
+    Fr.random(),
+    pxe,
+  );
+  console.log('✅ - Vote Contract Deployed ');
+  return {
+    tallierContractAztecAddress: tallierContractAztecAddress.toString(),
+    voteContractAztecAddress: voteContractAztecAddress.toString(),
+  };
 }
 
-export async function handleInteractClick(contractAddress: string) {
+export async function handleVoteClick(contractAddress: string) {
+  console.log('🔄 - Voting');
+  const contractFunctionName = 'vote';
   const [wallet, ..._rest] = await getSandboxAccountsWallets(pxe);
-  const callArgs = { address: wallet.getCompleteAddress().address };
-  const getPkAbi = getFunctionAbi(TallierContractArtifact, 'getPublicKey');
+  const callArgs = { address: wallet.getCompleteAddress().address.toString() };
+  const getPkAbi = getFunctionAbi(VoterContractArtifact, contractFunctionName);
+  console.log('getPkAbi', getPkAbi);
+  console.log('🔄 - Converting Args');
   const typedArgs = convertArgs(getPkAbi, callArgs);
 
   // eslint-disable-next-line no-console
@@ -63,8 +86,8 @@ export async function handleInteractClick(contractAddress: string) {
 
   return await callContractFunction(
     AztecAddress.fromString(contractAddress),
-    contractArtifact,
-    'getPublicKey',
+    voteContractArtifact,
+    contractFunctionName,
     typedArgs,
     pxe,
     wallet.getCompleteAddress(),
@@ -93,10 +116,12 @@ export async function callContractFunction(
   // which provides an object with methods corresponding to the noir contract functions
   // that are named and typed and can be called directly.
   const contract = await Contract.at(address, artifact, selectedWallet);
-
-  return contract.methods[functionName](...typedArgs)
+  let transaction;
+  transaction = contract.methods[functionName](...typedArgs)
     .send()
     .wait();
+  console.log('✅ - Voted');
+  return transaction;
 }
 
 /**
