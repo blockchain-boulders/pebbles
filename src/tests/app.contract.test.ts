@@ -11,6 +11,7 @@ import {
   TxStatus,
   Wallet,
   createPXEClient,
+  getSandboxAccountsWallets,
   waitForSandbox,
 } from '@aztec/aztec.js';
 import { createDebugLogger } from '@aztec/foundation/log';
@@ -52,6 +53,7 @@ describe('ZK Contract Tests', () => {
   let voterContractAddress: AztecAddress;
   let tallierContractAddress: AztecAddress;
   let pxe: PXE;
+  let wallets: AccountWallet[];
 
   beforeAll(async () => {
     pxe = await setupSandbox();
@@ -59,22 +61,43 @@ describe('ZK Contract Tests', () => {
     [owner, _account2, _account3] = accounts;
 
     wallet = await getWallet(owner, pxe);
+    wallets = await getSandboxAccountsWallets(pxe);
 
     tallierContract = await deployTallierContract(owner, wallet, pxe);
-    tallierContractAddress = tallierContract.address
+    tallierContractAddress = tallierContract.address;
 
     voterContract = await deployVoterContract(owner, wallet, pxe);
     voterContractAddress = voterContract.address;
   }, 60000);
 
+  test('try to vote option 0', async () => {
+    await expect(
+      voterContract.withWallet(wallets[0]).methods.vote(0, tallierContractAddress).send().wait(),
+    ).rejects.toThrow("(JSON-RPC PROPAGATED) Assertion failed: vote should be greater than 0 'vote as u32 > 0'");
+  }, 40000);
+
   test('sending a vote', async () => {
-    const prevValue = await tallierContract.methods.read_vote().view();
-    console.log("PREV VALUE: ", prevValue)
-    const callTxReceipt = await voterContract.methods.vote(1, tallierContractAddress).send().wait()
+    const prevVote0 = await tallierContract.methods.readVoteCounter(1).view();
+    const prevVote1 = await tallierContract.methods.readVoteCounter(2).view();
 
-    const vote = await tallierContract.methods.read_vote().view();
-    console.log("AFTER VALUE: ", vote)
+    expect(prevVote0).toBe(0n);
+    expect(prevVote1).toBe(0n);
 
-    expect(callTxReceipt.status).toBe(TxStatus.MINED);
+    await voterContract.withWallet(wallets[0]).methods.vote(1, tallierContractAddress).send().wait();
+    await voterContract.withWallet(wallets[1]).methods.vote(2, tallierContractAddress).send().wait();
+
+    await tallierContract.methods.calculateResult().send().wait();
+
+    const vote0 = await tallierContract.methods.readVoteCounter(1).view();
+    const vote1 = await tallierContract.methods.readVoteCounter(2).view();
+
+    expect(vote0).toBe(1n);
+    expect(vote1).toBe(1n);
+  }, 40000);
+
+  test('try to change my vote', async () => {
+    await expect(
+      voterContract.withWallet(wallets[0]).methods.vote(2, tallierContractAddress).send().wait(),
+    ).rejects.toThrow("(JSON-RPC PROPAGATED) Assertion failed: already voted 'storage.votes.at(voterAddress).read() as u32 <= 0'");
   }, 40000);
 });
